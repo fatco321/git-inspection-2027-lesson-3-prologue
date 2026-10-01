@@ -1,0 +1,151 @@
+.prologue-ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  color: #eff2e7;
+  font-family: system-ui, sans-serif;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid #b5d9cb;
+  border-radius: 8px;
+  background: #bfddd0;
+  color: #173b40;
+  padding: 12px 26px;
+  transition: background 0.2s;
+  pointer-events: auto;
+}
+button:hover {
+  background: #d7ecdf;
+}
+button:focus-visible {
+  outline: 3px solid #e8c480;
+  outline-offset: 4px;
+}
+button:disabled {
+  cursor: wait;
+  opacity: 0.75;
+}
+.start-overlay,
+.end-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1b333544;
+  pointer-events: auto;
+}
+.start-overlay button {
+  font-size: 22px;
+  padding: 17px 58px;
+  box-shadow: 0 12px 40px #132d3444;
+}
+.before-start #game {
+  filter: blur(17px);
+  transform: scale(1.04);
+}
+.dialogue {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(880px, calc(100vw - 40px));
+  box-sizing: border-box;
+  display: flex;
+  gap: 24px;
+  padding: 22px;
+  border: 2px solid #91bdb5;
+  border-radius: 12px;
+  background: #183641f5;
+  box-shadow: 0 10px 60px #081e3344;
+  pointer-events: auto;
+}
+.dialogue img {
+  width: 132px;
+  height: 148px;
+  object-fit: cover;
+  border: 1px solid #84b5a5;
+  border-radius: 8px;
+  background: #344b50;
+  align-self: flex-end;
+}
+.dialogue-content {
+  flex: 1;
+  min-width: 0;
+}
+.dialogue h2 {
+  margin: 0;
+  color: #b8e4d0;
+  font-size: 20px;
+}
+.dialogue p {
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 12px 0 16px;
+}
+.dialogue button {
+  float: right;
+}
+.end-overlay {
+  background: #19313abe;
+  backdrop-filter: blur(10px);
+  flex-direction: column;
+  text-align: center;
+  padding: 32px;
+  box-sizing: border-box;
+  animation: end-in 0.7s ease both;
+}
+.end-overlay h1 {
+  color: #c2edda;
+  font-size: clamp(28px, 5vw, 42px);
+  margin: 0 0 16px;
+}
+.end-overlay p {
+  max-width: 570px;
+  font-size: 20px;
+  line-height: 1.55;
+  margin: 0;
+}
+[hidden] {
+  display: none !important;
+}
+@keyframes end-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (max-width: 650px) {
+  .dialogue {
+    bottom: 14px;
+    gap: 12px;
+    padding: 16px;
+    width: calc(100vw - 24px);
+  }
+  .dialogue img {
+    width: 80px;
+    height: 100px;
+    align-self: flex-start;
+  }
+  .dialogue h2 {
+    font-size: 16px;
+  }
+  .dialogue p {
+    font-size: 15px;
+  }
+  .dialogue button {
+    padding: 10px 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .end-overlay {
+    animation: none;
+  }
+  button {
+    transition: none;
+  }
+}
