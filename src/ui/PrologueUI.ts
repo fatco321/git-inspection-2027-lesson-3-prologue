@@ -57,7 +57,7 @@ export class PrologueUI {
     this.heading.textContent =
       speaker === "guide"
         ? remote
-          ? "Андрей · на связи"
+          ? "Андрей Криницын"
           : "Андрей Криницын"
         : "Специалист по охране труда";
     this.text.textContent = text;

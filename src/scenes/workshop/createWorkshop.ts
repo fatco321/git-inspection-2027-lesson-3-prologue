@@ -1,3 +1,4 @@
+import { documentTable as table, tabletRest } from './workshopLayout';
 import { Scene } from "@babylonjs/core/scene";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
@@ -54,7 +55,7 @@ export function createWorkshop(scene: Scene, shadows: ShadowGenerator) {
     mesh.position.set(x, y, z);
     mesh.material = m;
     mesh.receiveShadows = true;
-    if (m.alpha === 1) shadows.addShadowCaster(mesh);
+    if (m.alpha === 1 && name !== "floor tile" && name !== "foundation") shadows.addShadowCaster(mesh);
     return mesh;
   };
   const cyl = (
@@ -74,40 +75,40 @@ export function createWorkshop(scene: Scene, shadows: ShadowGenerator) {
     mesh.position.set(x, y, z);
     mesh.material = m;
     mesh.receiveShadows = true;
-    if (m.alpha === 1) shadows.addShadowCaster(mesh);
+    if (m.alpha === 1 && name !== "floor tile" && name !== "foundation") shadows.addShadowCaster(mesh);
     return mesh;
   };
-  box("foundation", 0, -0.18, -2.7, 10.5, 0.35, 14.2, dark);
+  box("foundation", 0, -0.18, -3.7, 10.5, 0.35, 16.2, dark);
   for (let x = 0; x < 10; x++)
-    for (let z = 0; z < 14; z++)
+    for (let z = 0; z < 16; z++)
       box(
         "floor tile",
         -4.5 + x,
         0.006,
-        -9.2 + z,
+        -11.2 + z,
         0.985,
         0.025,
         0.985,
-        z < 9 ? mint : plaster,
+        z < 11 ? mint : plaster,
       );
-  box("back wall", 0, 1.7, -9.75, 10.5, 3.4, 0.16, plaster);
-  box("left wall", -5.15, 1.7, -2.7, 0.16, 3.4, 14.1, plaster);
-  box("wall base", 0, 0.14, -9.63, 10.2, 0.25, 0.07, trim);
-  box("left base", -5.04, 0.14, -2.7, 0.07, 0.25, 14, trim);
-  box("back color band", 0, 0.7, -9.64, 10.2, 1, 0.04, teal);
+  box("back wall", 0, 1.7, -11.75, 10.5, 3.4, 0.16, plaster);
+  box("left wall", -5.15, 1.7, -3.7, 0.16, 3.4, 16.1, plaster);
+  box("wall base", 0, 0.14, -11.63, 10.2, 0.25, 0.07, trim);
+  box("left base", -5.04, 0.14, -3.7, 0.07, 0.25, 16, trim);
+  box("back color band", 0, 0.7, -11.64, 10.2, 1, 0.04, teal);
   for (const x of [-3.6, 0, 3.6]) {
-    box("window frame", x, 2.35, -9.63, 2.55, 1.4, 0.09, trim);
+    box("window frame", x, 2.35, -11.63, 2.55, 1.4, 0.09, trim);
     box(
       "blue window",
       x,
       2.35,
-      -9.56,
+      -11.56,
       2.38,
       1.23,
       0.025,
       material("sky " + x, "#91b7bf"),
     );
-    box("window mullion", x, 2.35, -9.52, 0.05, 1.25, 0.06, trim);
+    box("window mullion", x, 2.35, -11.52, 0.05, 1.25, 0.06, trim);
   }
   // Lower partition and clear panes leave the workshop readable from the preparation room.
   box("partition base", -1.35, 0.43, -0.65, 7.5, 0.86, 0.12, teal);
@@ -128,57 +129,15 @@ export function createWorkshop(scene: Scene, shadows: ShadowGenerator) {
   box("door left jamb", 2.4, 1.4, -0.65, 0.12, 2.8, 0.15, teal);
   box("door header", 3.45, 2.77, -0.65, 2.2, 0.12, 0.15, teal);
   box("entrance side return", 4.85, 1.4, -0.65, 0.6, 2.8, 0.15, plaster);
-  // Workshop: workbench, machine, protective equipment and storage.
-  box("bench top", -3.25, 0.96, -5.8, 2.9, 0.12, 1.1, wood);
-  for (const x of [-4.5, -2])
-    for (const z of [-6.2, -5.4])
-      box("bench leg", x, 0.47, z, 0.1, 0.94, 0.1, dark);
-  box("tool board", -3.25, 1.82, -6.47, 2.8, 1.15, 0.07, wood);
-  for (let i = 0; i < 7; i++) {
-    box(
-      "tool handle",
-      -4.25 + i * 0.34,
-      1.75,
-      -6.37,
-      0.065,
-      0.36,
-      0.045,
-      i % 2 ? teal : ochre,
-    );
-    box("tool peg", -4.25 + i * 0.34, 1.84, -6.4, 0.025, 0.025, 0.13, dark);
-    box("tool head", -4.25 + i * 0.34, 1.96, -6.36, 0.19, 0.085, 0.07, dark);
-  }
-  box("machine base", -0.55, 0.43, -3.95, 1.1, 0.86, 0.9, teal);
-  box("machine bed", -0.55, 0.93, -3.95, 1.3, 0.14, 1.05, dark);
-  cyl("machine column", -0.55, 1.55, -4.22, 0.15, 1.2, dark);
-  box("drill head", -0.55, 2.08, -4.05, 0.65, 0.35, 0.75, teal);
-  cyl("drill chuck", -0.55, 1.855, -3.73, 0.13, 0.13, dark);
-  cyl("drill bit", -0.55, 1.615, -3.73, 0.035, 0.35, dark);
-  box("machine button", -0.2, 1.97, -3.8, 0.06, 0.09, 0.1, ochre);
-  box("equipment cabinet back", 0.95, 1.05, -6.4, 1.55, 2.1, 0.12, teal);
-  for (const x of [0.14, 1.76])
-    box("cabinet side", x, 1.05, -6.12, 0.1, 2.1, 0.65, teal);
-  for (const y of [0.1, 0.75, 1.4, 2.08])
-    box("cabinet shelf", 0.95, y, -6.12, 1.65, 0.06, 0.7, trim);
-  for (let i = 0; i < 6; i++)
-    box(
-      "protective kit",
-      0.58 + (i % 2) * 0.72,
-      0.33 + Math.floor(i / 2) * 0.65,
-      -6.07,
-      0.47,
-      0.4,
-      0.42,
-      i % 2 ? ochre : mint,
-    );
+  // Workshop furniture is loaded from the same CC0 pack as the machines.
   for (let level = 0; level < 2; level++)
     for (let col = 0; col < 2; col++) {
       const x = 3.1 + col * 0.7,
         y = 0.5085 + level * 0.62;
-      box("storage crate", x, y, -8.5, 0.65, 0.62, 0.8, wood);
-      box("crate band", x, y, -8.09, 0.12, 0.62, 0.025, ochre);
+      box("storage crate", x, y, -10.5, 0.65, 0.62, 0.8, wood);
+      box("crate band", x, y, -10.09, 0.12, 0.62, 0.025, ochre);
     }
-  box("pallet", 3.45, 0.1085, -8.5, 1.5, 0.18, 1.05, dark);
+  box("pallet", 3.45, 0.1085, -10.5, 1.5, 0.18, 1.05, dark);
   // Open storage entrance: a second room visible beyond the work area.
   box("storage partition", -1.6, 1.35, -6.6, 7.1, 2.7, 0.16, plaster);
   box("storage base band", -1.6, 0.55, -6.49, 7.1, 1.05, 0.05, teal);
@@ -189,28 +148,28 @@ export function createWorkshop(scene: Scene, shadows: ShadowGenerator) {
   // Low open shelving retains sight lines into the stockroom.
   for (const x of [-3.8, -1.1, 1.6]) {
     for (const dx of [-0.95, 0.95])
-      box("storage rack upright", x + dx, 1.05, -8.7, 0.09, 2.1, 0.65, dark);
+      box("storage rack upright", x + dx, 1.05, -10.7, 0.09, 2.1, 0.65, dark);
     for (const y of [0.15, 0.85, 1.55]) {
-      box("storage rack shelf", x, y, -8.7, 2, 0.08, 0.75, wood);
+      box("storage rack shelf", x, y, -10.7, 2, 0.08, 0.75, wood);
       for (const dx of [-0.5, 0.5]) {
-        box("stock carton", x + dx, y + 0.27, -8.7, 0.65, 0.46, 0.56, mint);
-        box("carton tape", x + dx, y + 0.505, -8.7, 0.12, 0.012, 0.56, trim);
+        box("stock carton", x + dx, y + 0.27, -10.7, 0.65, 0.46, 0.56, mint);
+        box("carton tape", x + dx, y + 0.505, -10.7, 0.12, 0.012, 0.56, trim);
       }
     }
   }
   // A clear aisle connects preparation, workstations and the stockroom.
   for (const x of [2.8, 4.35])
     box("aisle edge", x, 0.026, -4.05, 0.045, 0.012, 5.0, ochre);
-  // Preparation area. Furniture is offset from both arrival positions and the route to the tablet.
-  box("preparation table top", 2.8, 0.97, 1.11, 2.5, 0.12, 1.42, wood);
-  for (const x of [1.7, 3.9])
-    for (const z of [0.53, 1.69])
+  // Back edge sits against the glazed partition, clear of the doorway.
+  box("preparation table top", table.x, 0.97, table.z, table.width, 0.12, table.depth, wood);
+  for (const x of [table.x - 1.1, table.x + 1.1])
+    for (const z of [table.z - .58, table.z + .58])
       box("table leg", x, 0.465, z, 0.085, 0.93, 0.085, dark);
-  box("table drawer", 3.6, 0.76, 1.11, 0.55, 0.32, 1.15, teal);
-  box("drawer pull", 3.6, 0.78, 1.70, 0.26, 0.035, 0.03, trim);
-  box("paper stack", 3.35, 1.0475, 1.16, 0.46, 0.035, 0.32, trim);
-  cyl("cup", 3.68, 1.155, 0.7, 0.16, 0.25, clay);
-  cyl("cup interior", 3.68, 1.281, 0.7, 0.125, 0.003, dark);
+  box("table drawer", table.x + .8, .76, table.z, .55, .32, 1.15, teal);
+  box("drawer pull", table.x + .8, .78, table.z + .59, .26, .035, .03, trim);
+  box("paper stack", table.x + .55, 1.0475, table.z + .05, .46, .035, .32, trim);
+  cyl("cup", table.x + .88, 1.155, table.z - .41, .16, .25, clay);
+  cyl("cup interior", table.x + .88, 1.281, table.z - .41, .125, .003, dark);
   box("wall bench", -4.65, 0.46, 2.15, 0.65, 0.12, 2.2, wood);
   for (const z of [1.3, 3])
     box("bench supports", -4.65, 0.2, z, 0.55, 0.4, 0.12, dark);
@@ -229,7 +188,8 @@ export function createWorkshop(scene: Scene, shadows: ShadowGenerator) {
     );
     leaf.rotation.z = Math.sin(i) * 0.45;
     leaf.material = mint;
+    leaf.receiveShadows = true;
     shadows.addShadowCaster(leaf);
   }
-  return { tabletPosition: new Vector3(1.85, 1.043, 1.5) };
+  return { tabletPosition: new Vector3(tabletRest.x, tabletRest.y, tabletRest.z) };
 }

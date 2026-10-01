@@ -12,6 +12,8 @@ import type { AssetContainer } from "@babylonjs/core/assetContainer";
 import type { AnimationGroup } from "@babylonjs/core/Animations/animationGroup";
 import { ModelLoader } from "../assets/ModelLoader";
 import { createWorkshop } from "../scenes/workshop/createWorkshop";
+import { loadWorkshopProps } from "../scenes/workshop/loadWorkshopProps";
+import { tabletPickup, documentTable } from "../scenes/workshop/workshopLayout";
 import { createTablet } from "../scenes/workshop/createTablet";
 import { groundedCharacterY } from "../scenes/characters/groundCharacter";
 import { TabletPose } from "../scenes/characters/TabletPose";
@@ -59,6 +61,8 @@ export class PrologueGame {
   private scene: Scene;
   private camera: ArcRotateCamera;
   private loader: ModelLoader;
+  private shadows: ShadowGenerator;
+  private walkDuration = 2.75;
   private ui: PrologueUI;
   private hero?: Actor;
   private guide?: Actor;
@@ -71,10 +75,10 @@ export class PrologueGame {
   private line = 0;
   private disposed = false;
   private walkStart = new Vector3(-1.25, 0.03, 2);
-  private walkEnd = new Vector3(1.48, 0.03, 2.0);
+  private walkEnd = new Vector3(tabletPickup.x, 0.03, tabletPickup.z);
   private tabletStart: Vector3;
-  private cameraGoal = new Vector3(0, 1, -2.2);
-  private radiusGoal = 19;
+  private cameraGoal = new Vector3(0, 1, -3.4);
+  private radiusGoal = 22;
   readonly ready: Promise<void>;
   constructor(private canvas: HTMLCanvasElement) {
     this.engine = new Engine(canvas, true, {
@@ -91,7 +95,7 @@ export class PrologueGame {
       "prologue camera",
       1.13,
       0.91,
-      19,
+      22,
       this.cameraGoal.clone(),
       this.scene,
     );
@@ -103,20 +107,25 @@ export class PrologueGame {
       new Vector3(0, 1, 0),
       this.scene,
     );
-    sky.intensity = 0.83;
+    sky.intensity = 0.72;
     sky.groundColor = Color3.FromHexString("#8b9a9a");
     const sun = new DirectionalLight(
       "window sunlight",
       new Vector3(-0.7, -1, 0.5),
       this.scene,
     );
-    sun.position.set(5, 10, -6);
+    sun.position.set(10.5, 16, -11.2);
     sun.intensity = 0.85;
     sun.diffuse = Color3.FromHexString("#fff1d7");
-    const shadows = new ShadowGenerator(2048, sun);
+    sun.shadowFrustumSize = 24;
+    sun.shadowMinZ = .1;
+    sun.shadowMaxZ = 40;
+    const shadows = this.shadows = new ShadowGenerator(2048, sun);
     shadows.usePercentageCloserFiltering = true;
-    shadows.bias = 0.0005;
-    shadows.normalBias = 0.02;
+    shadows.filteringQuality = ShadowGenerator.QUALITY_HIGH;
+    shadows.transparencyShadow = true;
+    shadows.bias = 0.0003;
+    shadows.normalBias = 0.015;
     const workshop = createWorkshop(this.scene, shadows);
     this.tabletStart = workshop.tabletPosition;
     this.tablet = createTablet(this.scene, this.tabletStart, shadows);
@@ -170,8 +179,9 @@ export class PrologueGame {
         }
       });
       if (!this.hero || !this.guide) throw new Error("Character load failed");
-      for (const a of [this.hero, this.guide])
-        for (const mesh of a.root.getChildMeshes()) mesh.visibility = 0;
+      for (const a of [this.hero, this.guide]) a.root.setEnabled(false);
+      await loadWorkshopProps(this.scene, this.loader, this.shadows);
+      if (this.disposed) return;
       await this.scene.whenReadyAsync();
       if (!this.disposed) {
         this.ui.ready();
@@ -179,14 +189,15 @@ export class PrologueGame {
           document.querySelector(".start-overlay")?.remove();
           document.body.classList.remove("before-start");
           const focus = new URLSearchParams(location.search).get("roomFocus");
-          this.cameraGoal.set(focus === "table" ? 2.8 : 0, 1, focus === "storage" ? -8 : focus === "table" ? 1.05 : -2.8);
+          this.cameraGoal.set(focus === "table" ? documentTable.x : 0, 1, focus === "storage" ? -9.2 : focus === "table" ? .5 : -3.7);
           this.camera.target.copyFrom(this.cameraGoal);
-          this.camera.radius = this.radiusGoal = focus === "table" ? 6 : focus === "storage" ? 11 : 20;
+          this.camera.radius = this.radiusGoal = focus === "table" ? 6 : focus === "storage" ? 11 : 22;
           this.camera.beta = 0.8;
           this.camera.alpha = Number(new URLSearchParams(location.search).get("view") ?? 1.13);
         }
         if (import.meta.env.DEV && new URLSearchParams(location.search).has("previewTablet")) {
           this.guide.root.setEnabled(false);
+          this.hero.root.setEnabled(true);
           this.hero.root.position.copyFrom(this.walkEnd);
           this.hero.root.rotation.y = Math.atan2(this.tabletStart.x - this.walkEnd.x, this.tabletStart.z - this.walkEnd.z);
           for (const mesh of this.hero.root.getChildMeshes()) mesh.visibility = 1;
@@ -210,16 +221,18 @@ export class PrologueGame {
   }
   private start() {
     if (this.phase !== "ready" || !this.hero || !this.guide) return;
-    for (const a of [this.hero, this.guide])
+    for (const a of [this.hero, this.guide]) {
+      a.root.setEnabled(true);
       for (const mesh of a.root.getChildMeshes()) mesh.visibility = 1;
+    }
     this.teleport = new Teleport(
       this.scene,
       [this.hero.root, this.guide.root],
       true,
     );
     this.setPhase("arrival");
-    this.cameraGoal.set(0, 1, -2.2);
-    this.radiusGoal = 19;
+    this.cameraGoal.set(0, 1, -3.4);
+    this.radiusGoal = 22;
   }
   private setPhase(phase: Phase) {
     this.phase = phase;
@@ -250,8 +263,9 @@ export class PrologueGame {
     actor.walk?.start(true, 0.7);
     actor.idle?.setWeightForAllAnimatables(0);
     actor.walk?.setWeightForAllAnimatables(1);
-    actor.root.rotation.y = Math.PI / 2;
-    this.cameraGoal.set(1.5, 1.0, 1.2);
+    actor.root.rotation.y = Math.atan2(this.walkEnd.x - this.walkStart.x, this.walkEnd.z - this.walkStart.z);
+    this.walkDuration = Vector3.Distance(this.walkStart, this.walkEnd);
+    this.cameraGoal.set(documentTable.x, 1.0, .7);
     this.radiusGoal = 9;
   }
   private remote() {
@@ -310,7 +324,7 @@ export class PrologueGame {
       if (this.phase === "arrival" && this.teleport?.done) this.showLine();
       if (this.phase === "departure" && this.teleport?.done) this.beginWalk();
       if (this.phase === "walk") {
-        const t = Math.min(1, this.phaseTime / 2.75);
+        const t = Math.min(1, this.phaseTime / this.walkDuration);
         this.hero!.root.position.copyFrom(
           Vector3.Lerp(this.walkStart, this.walkEnd, t),
         );

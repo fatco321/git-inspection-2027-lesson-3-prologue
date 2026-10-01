@@ -7,3 +7,5 @@
 После изменений запускать `npm run build`, визуальные изменения проверять в Chrome. Освобождать ресурсы Babylon и обработчики при dispose/HMR. Публиковать проект только по запросу.
 
 Жизненный цикл — src/game/PrologueGame.ts; помещение и планшет — src/scenes/workshop/; модели и поза рук — src/scenes/characters/; телепортация — src/scenes/transition/; интерфейс — src/ui/. Завершение сохраняется только в git-inspection-2027:lesson-3-prologue.
+
+Мастерская синхронизирована с практикой урока 3: расстановка в `src/scenes/workshop/workshopLayout.ts`, загрузка моделей в `loadWorkshopProps.ts`. При переносе мебели проверять `tabletRest`/`tabletPickup`, путь героя и previewPickup. Источники и лицензии новых CC0-ассетов рядом с runtime-моделями.
