@@ -214,8 +214,8 @@ export class PrologueGame {
       }
     } catch (error) {
       if (!this.disposed) {
-        console.error(error);
-        this.ui.error();
+        this.dispose();
+        throw error;
       }
     }
   }
