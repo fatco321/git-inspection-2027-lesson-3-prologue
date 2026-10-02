@@ -9,3 +9,5 @@
 Жизненный цикл — src/game/PrologueGame.ts; помещение и планшет — src/scenes/workshop/; модели и поза рук — src/scenes/characters/; телепортация — src/scenes/transition/; интерфейс — src/ui/. Завершение сохраняется только в git-inspection-2027:lesson-3-prologue.
 
 Мастерская синхронизирована с практикой урока 3: расстановка в `src/scenes/workshop/workshopLayout.ts`, загрузка моделей в `loadWorkshopProps.ts`. При переносе мебели проверять `tabletRest`/`tabletPickup`, путь героя и previewPickup. Источники и лицензии новых CC0-ассетов рядом с runtime-моделями.
+
+Общий доступ: src/progress/courseSequence.ts — одинаковый контракт шести частей. Каждая часть требует завершения всех предыдущих, без DEV-обхода; src/main.ts проверяет доступ до bootstrap.ts и загрузки сцены. Финальные экраны сохраняют только завершение своей части; игровые действия и черновики не сохраняются. Старые корректные отметки совместимы. Для iframe нужен общий origin (схема, домен и порт).

@@ -1,3 +1,4 @@
+import {saveCompletion} from '../progress/saveCompletion';
 import "./prologue.css";
 type Speaker = "guide" | "hero";
 export class PrologueUI {
@@ -59,7 +60,7 @@ export class PrologueUI {
         ? remote
           ? "Андрей Криницын"
           : "Андрей Криницын"
-        : "Специалист по охране труда";
+        : "Вы";
     this.text.textContent = text;
     this.next.textContent = label;
     this.dialogue.hidden = false;
@@ -69,7 +70,7 @@ export class PrologueUI {
     this.dialogue.hidden = true;
     this.advance = undefined;
   }
-  finish(saved: boolean) {
+  finish() {
     this.hide();
     const h = document.createElement("h1");
     h.textContent = "Подготовьтесь к проверке";
@@ -77,12 +78,8 @@ export class PrologueUI {
     p.textContent =
       "Продолжите урок. После него вы вернётесь в мастерскую и проведёте проверку по видеосвязи.";
     this.end.append(h, p);
-    if (!saved) {
-      const note = document.createElement("p");
-      note.textContent = "Браузер не смог сохранить прохождение пролога.";
-      this.end.append(note);
-    }
     this.end.hidden = false;
+    saveCompletion('lesson-3-prologue',this.end);
   }
   error() {
     this.startButton.textContent =
